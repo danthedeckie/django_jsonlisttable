@@ -1,0 +1,81 @@
+<div id="scrollbox_for_{{ widget.attrs.id }}" class="scrollbox">
+<table class="jsonlistsortable_table">
+<thead>
+    <tr>
+        {% for field in widget.config.fields %}
+        <td>{{ field.title }}</td>
+        {% endfor %}
+        <td><!-- delete --></td>
+    </tr>
+</thead>
+<tbody id="orderlist_tbody_{{ widget.attrs.id }}"></tbody>
+</table>
+</div>
+<textarea name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}>{% if widget.value %}{{ widget.value }}{% endif %}</textarea>
+<div class="jsonlistedit_buttons" data-for="{{ widget.name }}">
+<button type="button" class="additem" data-item='{"name": "blah"}'>Blah</button>
+{% if widget.config.allow_titles %}
+<button type="button" class="additem" data-item='{"name": "", "_type": "title"}'>Title</button>
+{% endif %}
+{% if widget.config.allow_notes %}
+<button type="button" class="additem" data-item='{"_type":"notes"}'>Notes</button>
+{% endif %}
+</div>
+<script>
+new JSONListEdit(document.getElementById("{{ widget.attrs.id }}"), {
+    debug: {% if widget.config.debug %}true{% else %}false{% endif %},
+    templates: {
+        "default": "{% for field in widget.config.fields %}<td>$${{ field.name }}</td>{% endfor %}<td><button type='button' class='deleteitem'>&times;</button></td>"
+        {% if widget.config.allow_titles %}
+        ,"title": "<td colspan='{{ widget.config.fields| length }}'>$$name</td>"
+        {% endif %}
+        {% if widget.config.allow_notes %}
+        ,"notes": "<td colspan='{{ widget.config.fields|length}}'><textarea name='content' class='jsonlistauto'></textarea></td>"
+        {% endif %}
+    },
+    domNode: document.getElementById("orderlist_tbody_{{ widget.attrs.id }}"),
+    onAdd: function(obj, editor) {
+        var scrollbox = document.getElementById('scrollbox_for_{{ widget.attrs.id }}');
+        scrollbox.scrollTop = scrollbox.scrollHeight;
+    },
+    itemElement: 'tr',
+    defaultvalues: {'default':
+        {'price': 100}}
+
+    });
+</script>
+
+<style>
+#scrollbox_for_{{ widget.attrs.id }} {
+    min-height: 20vh;
+    max-height: 60vh;
+    width: 90%;
+    border: 1px solid #ddd;
+    margin: auto;
+    border-radius: 0.2em;
+    overflow-y: scroll;
+}
+.scrollbox table {
+    width: 100%;
+}
+.scrollbox thead {
+    font-weight: bold;
+}
+.scrollbox tbody tr:nth-of-type(odd) {
+    background-color: #efefef;
+}
+table input {
+    width: 98%;
+}
+input[name=price].jsonlistauto {
+    width: 5em;
+}
+.scrollbox .title input {
+    display: block;
+    font-size: 2em;
+}
+.scrollbox textarea {
+    width: 90%;
+    min-height: 5em;
+}
+</style>
